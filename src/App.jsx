@@ -1,7 +1,6 @@
 //MODULI
 import { useState, useEffect } from "react";
 import "./assets/css/App.css";
-import { list as dataList } from "./assets/data/data.js";
 
 //FUNZIONI
 const getNextId = (list) => {
@@ -47,13 +46,15 @@ const initialFormData = {
 
 function App() {
   //variabili reattive
-  const [items, setItems] = useState(dataList);
+  const [items, setItems] = useState([]);
   const [articleFormData, setArticleFormData] = useState(initialFormData);
 
   const getData = () => {
-    fetch("https://localhost:3000")
+    fetch("http://localhost:3000")
       .then((res) => res.json())
-      .then((data) => console.log(data));
+      .then((data) => {
+        setItems(data.posts);
+      });
   };
 
   useEffect(getData, []);
