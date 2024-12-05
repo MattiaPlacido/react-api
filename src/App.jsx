@@ -2,19 +2,15 @@
 import { useState, useEffect } from "react";
 import "./assets/css/App.css";
 
-//FUNZIONI
+//UTILS
 const getNextId = (list) => {
   //id di default
   let nextId = 1;
-
   const idList = list.map((item) => item.id);
-
   while (idList.includes(nextId)) {
     nextId++;
   }
-
   console.log(nextId);
-
   return nextId;
 };
 
@@ -49,7 +45,7 @@ function App() {
   const [items, setItems] = useState([]);
   const [articleFormData, setArticleFormData] = useState(initialFormData);
 
-  //funzioni di richiesta
+  //SHOW
   const getData = () => {
     fetch("http://localhost:3000")
       .then((res) => res.json())
@@ -61,40 +57,46 @@ function App() {
 
   useEffect(getData, []);
 
+  //DELETE
   const deleteData = (id) => {
     fetch("http://localhost:3000/" + id, {
       method: "DELETE",
     })
-      .then((res) => res.json())
-      .then(console.log("L'oggetto selezionato è stato eliminato con successo"))
+      .then((res) => {
+        if (!res.ok)
+          throw new Error("Errore nella cancellazione dell'articolo");
+        return res.json();
+      })
+      .then(() => {
+        console.log(`L'oggetto con ID ${id} è stato eliminato con successo`);
+        setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      })
       .catch((error) =>
         console.error("Errore nella richiesta DELETE :", error)
       );
   };
 
+  //STORE
   const storeData = (item) => {
     fetch("http://localhost:3000/", {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({
-        id: item.id,
-        title: item.title,
-        content: item.content,
-        image: item.image,
-        category: item.category,
-        published: item.published,
-      }),
+      body: JSON.stringify(item),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Errore nell'aggiunta dell'articolo");
+        return res.json();
+      })
       .then((data) => {
-        console.log(`l'oggetto è stato mandato con successo`);
+        console.log(`L'articolo è stato aggiunto con successo:`, data);
       })
       .catch((error) => console.error("Errore nella richiesta POST :", error));
   };
 
   //HANDLERS
+  //MODIFICA DATI NEL FORM
   function handleArticleFormData(e) {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
@@ -104,7 +106,7 @@ function App() {
       [e.target.name]: value,
     }));
   }
-  //gestisco l'invio dei dati nel form
+  //INVIO DATI DEL FORM
   const handleFormSubmit = (e) => {
     const { title, content, image, published, category } = articleFormData;
 
@@ -133,7 +135,7 @@ function App() {
     setArticleFormData(initialFormData);
   };
 
-  //gestisco il click dell'item (AKA cancellazione)
+  //CANCELLAZIONE OGGETTI
   const handleListItemClick = (id) => {
     //setto la lista ad una nuova lista che filtra per tutto tranne l'oggetto da eliminare
     const cleanList = items.filter((item) => item.id !== id);
