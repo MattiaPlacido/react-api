@@ -5,17 +5,17 @@ import "./assets/css/App.css";
 //FUNZIONI
 const getNextId = (list) => {
   //id di default
-  let lastId = 1;
+  let nextId = 1;
 
   const idList = list.map((item) => item.id);
 
-  while (idList.includes(lastId)) {
-    lastId++;
+  while (idList.includes(nextId)) {
+    nextId++;
   }
 
-  console.log(lastId);
+  console.log(nextId);
 
-  return lastId;
+  return nextId;
 };
 
 const getBadgeColor = (category) => {
@@ -55,7 +55,8 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setItems(data.posts);
-      });
+      })
+      .catch((error) => console.error("Errore nella richiesta SHOW :", error));
   };
 
   useEffect(getData, []);
@@ -65,9 +66,32 @@ function App() {
       method: "DELETE",
     })
       .then((res) => res.json())
+      .then(console.log("L'oggetto selezionato è stato eliminato con successo"))
+      .catch((error) =>
+        console.error("Errore nella richiesta DELETE :", error)
+      );
+  };
+
+  const storeData = (item) => {
+    fetch("http://localhost:3000/", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        image: item.image,
+        category: item.category,
+        published: item.published,
+      }),
+    })
+      .then((res) => res.json())
       .then((data) => {
-        console.log(`l'oggetti con id ${data.id} è stato eliminato`);
-      });
+        console.log(`l'oggetto è stato mandato con successo`);
+      })
+      .catch((error) => console.error("Errore nella richiesta POST :", error));
   };
 
   //HANDLERS
@@ -80,7 +104,7 @@ function App() {
       [e.target.name]: value,
     }));
   }
-
+  //gestisco l'invio dei dati nel form
   const handleFormSubmit = (e) => {
     const { title, content, image, published, category } = articleFormData;
 
@@ -92,26 +116,30 @@ function App() {
     e.preventDefault();
     //creo una nuova lista che conterrà quella vecchia + l'oggetto nuovo
     const newList = [...items];
-    newList.push({
-      id: getNextId([...items]),
+
+    const nextId = getNextId(items);
+    const newItem = {
+      id: nextId,
       title: title,
       content: content,
       image: image,
       published: published,
       category: category,
-    });
+    };
+    newList.push(newItem);
 
     setItems(newList);
-
+    storeData(newItem);
     setArticleFormData(initialFormData);
   };
 
-  // const handleListItemClick = (id) => {
-  //   //setto la lista ad una nuova lista che filtra per tutto tranne l'oggetto da eliminare
-  //   const cleanList = items.filter((item) => item.id !== id);
-  //   setItems(cleanList);
-  //   deleteData(id);
-  // };
+  //gestisco il click dell'item (AKA cancellazione)
+  const handleListItemClick = (id) => {
+    //setto la lista ad una nuova lista che filtra per tutto tranne l'oggetto da eliminare
+    const cleanList = items.filter((item) => item.id !== id);
+    setItems(cleanList);
+    deleteData(id);
+  };
 
   //DOM
   return (
@@ -181,7 +209,7 @@ function App() {
               item.published === false ? " inactive" : ""
             }`}
             key={item.id}
-            onClick={() => deleteData(id)}
+            onClick={() => handleListItemClick(item.id)}
           >
             <img src={item.image || "https://placehold.co/600x400"} />
             <p className="item-title">
