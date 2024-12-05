@@ -49,6 +49,7 @@ function App() {
   const [items, setItems] = useState([]);
   const [articleFormData, setArticleFormData] = useState(initialFormData);
 
+  //funzioni di richiesta
   const getData = () => {
     fetch("http://localhost:3000")
       .then((res) => res.json())
@@ -58,6 +59,16 @@ function App() {
   };
 
   useEffect(getData, []);
+
+  const deleteData = (id) => {
+    fetch("http://localhost:3000/" + id, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(`l'oggetti con id ${data.id} è stato eliminato`);
+      });
+  };
 
   //HANDLERS
   function handleArticleFormData(e) {
@@ -95,11 +106,12 @@ function App() {
     setArticleFormData(initialFormData);
   };
 
-  const handleListItemClick = (id) => {
-    //setto la lista ad una nuova lista che filtra per tutto tranne l'oggetto da eliminare
-    const cleanList = items.filter((item) => item.id !== id);
-    setItems(cleanList);
-  };
+  // const handleListItemClick = (id) => {
+  //   //setto la lista ad una nuova lista che filtra per tutto tranne l'oggetto da eliminare
+  //   const cleanList = items.filter((item) => item.id !== id);
+  //   setItems(cleanList);
+  //   deleteData(id);
+  // };
 
   //DOM
   return (
@@ -169,7 +181,7 @@ function App() {
               item.published === false ? " inactive" : ""
             }`}
             key={item.id}
-            onClick={() => handleListItemClick(item.id)}
+            onClick={() => deleteData(id)}
           >
             <img src={item.image || "https://placehold.co/600x400"} />
             <p className="item-title">
