@@ -36,7 +36,7 @@ const initialFormData = {
   title: "",
   content: "",
   image: "",
-  category: "sport",
+  category: "Sport",
   published: true,
 };
 
@@ -181,11 +181,11 @@ function App() {
           value={articleFormData.category}
           onChange={handleArticleFormData}
         >
-          <option value="music">Musica</option>
-          <option value="news">News</option>
-          <option value="gaming">Gaming</option>
-          <option value="sport">Sport</option>
-          <option value="politics">Politica</option>
+          <option value="Music">Musica</option>
+          <option value="News">News</option>
+          <option value="Gaming">Gaming</option>
+          <option value="Sport">Sport</option>
+          <option value="Politics">Politica</option>
         </select>
         <br />
         <div>
